@@ -46,9 +46,33 @@ public class TriageService {
     }
 
     @Transactional
+    public TriageEntry update(Long id, TriageEntry updated) {
+        TriageEntry existing = findById(id);
+        existing.setPatientId(updated.getPatientId());
+        existing.setPatientName(updated.getPatientName());
+        existing.setRiskClassification(updated.getRiskClassification());
+        existing.setChiefComplaint(updated.getChiefComplaint());
+        existing.setVitalSigns(updated.getVitalSigns());
+        existing.setObservations(updated.getObservations());
+        existing.setNurseId(updated.getNurseId());
+        existing.setNurseName(updated.getNurseName());
+
+        if (updated.getStatus() != null) {
+            existing.setStatus(updated.getStatus());
+        }
+
+        return triageRepository.save(existing);
+    }
+
+    @Transactional
     public TriageEntry updateStatus(Long id, TriageEntry.TriageStatus newStatus) {
         TriageEntry entry = findById(id);
         entry.setStatus(newStatus);
         return triageRepository.save(entry);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        triageRepository.delete(findById(id));
     }
 }

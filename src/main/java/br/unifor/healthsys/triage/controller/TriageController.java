@@ -47,9 +47,21 @@ public class TriageController {
         return ResponseEntity.ok(triageService.findWaitingQueue());
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<TriageEntry> update(@PathVariable Long id,
+                                              @Valid @RequestBody TriageEntry entry) {
+        return ResponseEntity.ok(triageService.update(id, entry));
+    }
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<TriageEntry> updateStatus(@PathVariable Long id,
                                                      @RequestParam TriageEntry.TriageStatus status) {
         return ResponseEntity.ok(triageService.updateStatus(id, status));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        triageService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
