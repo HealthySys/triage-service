@@ -48,4 +48,4 @@ internal:
   auth:
     token: ${INTERNAL_SERVICE_TOKEN:healthsys-internal-dev-token}
   patient-service:
-    base-url: ${PATIENT_SERVICE_INTERNAL_BASE_URL:http://patient-service:8082}
+    base-url: ${PATIENT_SERVICE_INTERNAL_BASE_URL:http://patient-service}
