@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "triage_entries")
@@ -24,6 +25,9 @@ public class TriageEntry {
     @NotNull
     @Column(name = "patient_id", nullable = false)
     private Long patientId;
+
+    @Column(name = "correlation_id", nullable = false, unique = true, length = 50)
+    private String correlationId;
 
     @Column(name = "patient_name", length = 200)
     private String patientName;
@@ -59,6 +63,9 @@ public class TriageEntry {
 
     @PrePersist
     protected void onCreate() {
+        if (correlationId == null || correlationId.isBlank()) {
+            correlationId = UUID.randomUUID().toString();
+        }
         triageDate = LocalDateTime.now();
         status = TriageStatus.AGUARDANDO_ATENDIMENTO;
     }
