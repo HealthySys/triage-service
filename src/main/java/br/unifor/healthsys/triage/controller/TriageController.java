@@ -31,10 +31,12 @@ public class TriageController {
             @Valid @RequestBody TriageEntry entry,
             @AuthenticationPrincipal AuthenticatedUser authenticatedUser
     ) {
-        requireAnyRole(authenticatedUser, "ENFERMEIRO", "MEDICO");
+        requireAnyRole(authenticatedUser, "ENFERMEIRO");
         if (correlationId != null && !correlationId.isBlank()) {
             entry.setCorrelationId(correlationId);
         }
+        entry.setNurseId(authenticatedUser.userId());
+        entry.setNurseName(authenticatedUser.nome());
         return ResponseEntity.status(HttpStatus.CREATED).body(triageService.performTriage(entry));
     }
 

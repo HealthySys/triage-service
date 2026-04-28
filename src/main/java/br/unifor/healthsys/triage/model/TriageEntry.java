@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -46,10 +48,10 @@ public class TriageEntry {
     @Column(columnDefinition = "TEXT")
     private String observations;
 
-    @Column(name = "nurse_id")
-    private String nurseId;
+    @Column(name = "nurse_id", nullable = false)
+    private Long nurseId;
 
-    @Column(name = "nurse_name", length = 200)
+    @Column(name = "nurse_name", nullable = false, length = 200)
     private String nurseName;
 
     @Column(name = "triage_date", nullable = false)
@@ -60,6 +62,14 @@ public class TriageEntry {
 
     @Column(name = "event_published")
     private boolean eventPublished = false;
+
+    @Transient
+    @Builder.Default
+    private List<TriageAllergyInput> alergiasReportadas = new ArrayList<>();
+
+    @Transient
+    @Builder.Default
+    private List<TriageVaccineInput> vacinasReportadas = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

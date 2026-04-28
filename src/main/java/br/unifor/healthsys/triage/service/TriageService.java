@@ -39,6 +39,9 @@ public class TriageService {
             entry.setPatientName(patient.nome());
         }
 
+        internalPatientClient.addAllergies(entry.getPatientId(), entry.getAlergiasReportadas());
+        internalPatientClient.addVaccines(entry.getPatientId(), entry.getVacinasReportadas());
+
         long startedAt = System.currentTimeMillis();
         TriageEntry saved = triageRepository.save(entry);
         eventProducer.publishTriageEvent(saved);
@@ -46,7 +49,8 @@ public class TriageService {
         log.info("triageProcessingMs={} correlationId={} triageId={}",
                 processingMs, saved.getCorrelationId(), saved.getId());
         if (processingMs > 5000) {
-            throw new IllegalStateException("Tempo de processamento da triagem excedeu o limite de 5 segundos.");
+            log.warn("Tempo de processamento da triagem acima do alvo (5s). correlationId={} triageId={} processingMs={}",
+                    saved.getCorrelationId(), saved.getId(), processingMs);
         }
         saved.setEventPublished(true);
         return triageRepository.save(saved);
@@ -89,8 +93,6 @@ public class TriageService {
         existing.setChiefComplaint(updated.getChiefComplaint());
         existing.setVitalSigns(updated.getVitalSigns());
         existing.setObservations(updated.getObservations());
-        existing.setNurseId(updated.getNurseId());
-        existing.setNurseName(updated.getNurseName());
 
         if (updated.getStatus() != null) {
             existing.setStatus(updated.getStatus());
