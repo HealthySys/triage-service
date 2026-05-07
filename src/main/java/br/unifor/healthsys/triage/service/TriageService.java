@@ -70,7 +70,7 @@ public class TriageService {
     }
 
     public List<TriageEntry> findWaitingQueue() {
-        return triageRepository.findByStatusOrderByRiskClassificationAscTriageDateAsc(
+        return triageRepository.findWaitingQueueByPriority(
                 TriageEntry.TriageStatus.AGUARDANDO_ATENDIMENTO);
     }
 
@@ -102,14 +102,31 @@ public class TriageService {
     }
 
     @Transactional
-    public TriageEntry updateStatus(Long id, TriageEntry.TriageStatus newStatus) {
+    public TriageEntry updateStatus(Long id, TriageEntry.TriageStatus newStatus, Long medicoId, String medicoName) {
         TriageEntry entry = findById(id);
+        TriageEntry.TriageStatus previousStatus = entry.getStatus();
         entry.setStatus(newStatus);
-        return triageRepository.save(entry);
+        TriageEntry saved = triageRepository.save(entry);
+
+        if (newStatus == TriageEntry.TriageStatus.EM_ATENDIMENTO
+                && previousStatus != TriageEntry.TriageStatus.EM_ATENDIMENTO) {
+            eventProducer.publishAttendanceStarted(saved, medicoId, medicoName);
+        }
+
+        return saved;
     }
 
     @Transactional
     public void delete(Long id) {
         triageRepository.delete(findById(id));
+    }
+
+    public void forwardPatientToTriage(Long patientId, Long forwardedById, String forwardedByName) {
+        InternalPatientClient.InternalPatientSummaryResponse patient =
+                internalPatientClient.fetchRequiredPatient(patientId);
+        if (!patient.ativo()) {
+            throw new IllegalArgumentException("Paciente inativo nao pode ser encaminhado para triagem.");
+        }
+        eventProducer.publishPatientForwarded(patient.id(), patient.nome(), forwardedById, forwardedByName);
     }
 }

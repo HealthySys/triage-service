@@ -80,9 +80,6 @@ public class TriageEntry {
         status = TriageStatus.AGUARDANDO_ATENDIMENTO;
     }
 
-    /**
-     * Classificacao de Risco - Protocolo Manchester
-     */
     public enum RiskClassification {
         VERMELHO("Emergencia", 0),
         LARANJA("Muito Urgente", 10),

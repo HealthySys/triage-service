@@ -22,9 +22,6 @@ public class TriageController {
         this.triageService = triageService;
     }
 
-    /**
-     * Endpoint de teletriagem / triagem presencial
-     */
     @PostMapping
     public ResponseEntity<TriageEntry> performTriage(
             @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId,
@@ -79,7 +76,12 @@ public class TriageController {
                                                      @RequestParam TriageEntry.TriageStatus status,
                                                      @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
         requireAnyRole(authenticatedUser, "MEDICO", "ENFERMEIRO");
-        return ResponseEntity.ok(triageService.updateStatus(id, status));
+        return ResponseEntity.ok(triageService.updateStatus(
+                id,
+                status,
+                authenticatedUser.userId(),
+                authenticatedUser.nome()
+        ));
     }
 
     @DeleteMapping("/{id}")
@@ -88,6 +90,18 @@ public class TriageController {
         requireAnyRole(authenticatedUser, "ADMIN");
         triageService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/encaminhar/{patientId}")
+    public ResponseEntity<Void> forwardPatient(@PathVariable Long patientId,
+                                               @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+        requireAnyRole(authenticatedUser, "RECEPCIONISTA", "ADMIN");
+        triageService.forwardPatientToTriage(
+                patientId,
+                authenticatedUser.userId(),
+                authenticatedUser.nome()
+        );
+        return ResponseEntity.accepted().build();
     }
 
     private void requireAnyRole(AuthenticatedUser authenticatedUser, String... roles) {
