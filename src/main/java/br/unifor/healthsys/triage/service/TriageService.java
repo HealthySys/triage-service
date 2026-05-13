@@ -1,6 +1,7 @@
 package br.unifor.healthsys.triage.service;
 
 import br.unifor.healthsys.triage.client.InternalPatientClient;
+import br.unifor.healthsys.triage.exception.ConflictException;
 import br.unifor.healthsys.triage.messaging.TriageEventProducer;
 import br.unifor.healthsys.triage.model.TriageEntry;
 import br.unifor.healthsys.triage.repository.TriageRepository;
@@ -34,6 +35,11 @@ public class TriageService {
                 internalPatientClient.fetchRequiredPatient(entry.getPatientId());
         if (!patient.ativo()) {
             throw new IllegalArgumentException("Paciente inativo nao pode ser encaminhado para triagem.");
+        }
+        if (!triageRepository.findOpenTriagesByPatientId(entry.getPatientId()).isEmpty()) {
+            throw new ConflictException(
+                    "Paciente ja possui um atendimento em andamento. Finalize-o antes de registrar uma nova triagem."
+            );
         }
         if (entry.getPatientName() == null || entry.getPatientName().isBlank()) {
             entry.setPatientName(patient.nome());

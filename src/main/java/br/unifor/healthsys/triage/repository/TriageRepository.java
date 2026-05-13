@@ -17,6 +17,16 @@ public interface TriageRepository extends JpaRepository<TriageEntry, Long> {
 
     @Query("""
             SELECT t FROM TriageEntry t
+            WHERE t.patientId = :patientId
+              AND t.status IN (
+                br.unifor.healthsys.triage.model.TriageEntry.TriageStatus.AGUARDANDO_ATENDIMENTO,
+                br.unifor.healthsys.triage.model.TriageEntry.TriageStatus.EM_ATENDIMENTO
+              )
+            """)
+    List<TriageEntry> findOpenTriagesByPatientId(@Param("patientId") Long patientId);
+
+    @Query("""
+            SELECT t FROM TriageEntry t
             WHERE t.status = :status
             ORDER BY
               CASE t.riskClassification

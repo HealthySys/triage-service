@@ -33,7 +33,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authorization = request.getHeader("Authorization");
 
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-            log.warn("JWT ausente ou invalido no triage-service. path={}", request.getRequestURI());
             filterChain.doFilter(request, response);
             return;
         }
@@ -41,9 +40,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = authorization.substring(7);
             AuthenticatedUser user = jwtService.parse(token);
-            response.setHeader("X-Auth-Debug-Role", String.valueOf(user.role()));
-            log.info("JWT aceito no triage-service. path={} user={} role={}",
-                    request.getRequestURI(), user.username(), user.role());
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     user,
                     token,
@@ -51,9 +47,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception ex) {
-            response.setHeader("X-Auth-Debug-Error", ex.getClass().getSimpleName());
-            log.error("Falha ao processar JWT no triage-service. path={} erro={}",
-                    request.getRequestURI(), ex.getClass().getSimpleName(), ex);
+            log.warn("Falha ao processar JWT no triage-service. path={} erro={}",
+                    request.getRequestURI(), ex.getClass().getSimpleName());
             SecurityContextHolder.clearContext();
         }
 
