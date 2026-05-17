@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "triage_entries")
@@ -24,6 +27,9 @@ public class TriageEntry {
     @NotNull
     @Column(name = "patient_id", nullable = false)
     private Long patientId;
+
+    @Column(name = "correlation_id", nullable = false, unique = true, length = 50)
+    private String correlationId;
 
     @Column(name = "patient_name", length = 200)
     private String patientName;
@@ -42,10 +48,10 @@ public class TriageEntry {
     @Column(columnDefinition = "TEXT")
     private String observations;
 
-    @Column(name = "nurse_id")
-    private String nurseId;
+    @Column(name = "nurse_id", nullable = false)
+    private Long nurseId;
 
-    @Column(name = "nurse_name", length = 200)
+    @Column(name = "nurse_name", nullable = false, length = 200)
     private String nurseName;
 
     @Column(name = "triage_date", nullable = false)
@@ -57,15 +63,23 @@ public class TriageEntry {
     @Column(name = "event_published")
     private boolean eventPublished = false;
 
+    @Transient
+    @Builder.Default
+    private List<TriageAllergyInput> alergiasReportadas = new ArrayList<>();
+
+    @Transient
+    @Builder.Default
+    private List<TriageVaccineInput> vacinasReportadas = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
+        if (correlationId == null || correlationId.isBlank()) {
+            correlationId = UUID.randomUUID().toString();
+        }
         triageDate = LocalDateTime.now();
         status = TriageStatus.AGUARDANDO_ATENDIMENTO;
     }
 
-    /**
-     * Classificacao de Risco - Protocolo Manchester
-     */
     public enum RiskClassification {
         VERMELHO("Emergencia", 0),
         LARANJA("Muito Urgente", 10),
