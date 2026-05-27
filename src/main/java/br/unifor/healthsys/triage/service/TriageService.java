@@ -122,11 +122,6 @@ public class TriageService {
         return saved;
     }
 
-    @Transactional
-    public void delete(Long id) {
-        triageRepository.delete(findById(id));
-    }
-
     public void forwardPatientToTriage(Long patientId, Long forwardedById, String forwardedByName) {
         InternalPatientClient.InternalPatientSummaryResponse patient =
                 internalPatientClient.fetchRequiredPatient(patientId);
