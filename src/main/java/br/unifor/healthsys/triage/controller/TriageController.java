@@ -84,14 +84,6 @@ public class TriageController {
         ));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id,
-                                       @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
-        requireAnyRole(authenticatedUser, "ADMIN");
-        triageService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @PostMapping("/encaminhar/{patientId}")
     public ResponseEntity<Void> forwardPatient(@PathVariable Long patientId,
                                                @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
